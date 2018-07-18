@@ -2,13 +2,20 @@ from twisted.internet.protocol import Protocol, Factory, error
 from twisted.internet.address import IPv4Address
 from twisted.python import failure
 from twisted.internet import reactor
-from models import User, Session, Message, Base, engine
+from werkzeug.local import Local
+from models import Message
 from config import *
 from errors import *
 import logging
 
-session = Session()
 connectionDone = failure.Failure(error.ConnectionDone())
+
+local = Local()
+protocol = local('protocol')
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(name)-24s [LINE:%(lineno)-3s]# %(levelname)-8s [%(asctime)s]  %(message)s')
+log = logging.getLogger('GLOBAL')
 
 
 def error_cache(func):
@@ -35,18 +42,9 @@ class UserProtocol(Protocol):
     def dataReceived(self, data: bytes):
         self.log.debug('Message %s' % data)
         message = Message.from_json(data)
-
-        if message.type == 'auth':
-            self.auth(message.data['name'], message.data['password'])
-
-        if message.type == 'reg':
-            self.reg(message.data['name'], message.data['password'])
+        self.server.handlers[message.type](message.data, self)
 
     def connectionLost(self, reason=connectionDone):
-        try:
-            self.server.remove(self)
-        except ValueError:
-            pass
         self.log.info('Disconnected')
 
     def send_error_message(self, exception):
@@ -55,48 +53,32 @@ class UserProtocol(Protocol):
             'message': exception.message
         }))
 
-    def send(self, data: Message):
-        self.transport.write(data.dump().encode('utf-8'))
-
-    def auth(self, name: str, password: str) -> User:
-        user = session.query(User).filter_by(name=name, password=password).first()
-        if not user:
-            raise BadLogin
-        user.proto = self
-        self.user = user
-        return user
-
-    def reg(self, name: str, password: str) -> User:
-        user = session.query(User).filter_by(name=name).first()
-        if user:
-            raise RegError
-        user = User(self, name=name, password=password)
-        session.add(user)
-        session.commit()
-        self.user = user
-        return user
+    def send(self, message: Message):
+        self.log.debug('Send %s  %s' % (message.type, message.data))
+        self.transport.write(message.dump().encode('utf-8'))
 
 
 class ServerFactory(Factory):
-    handlers = []
+    handlers = {}
 
-    def buildProtocol(self, addr: tuple) -> UserProtocol:
+    def handle(self, event):
+        def decorator(func):
+            def warpper(data, proto):
+                # noinspection PyUnresolvedReferences,PyDunderSlots
+                local.protocol = proto
+                return func(**data)
+
+            self.handlers[event] = warpper
+            return warpper
+
+        return decorator
+
+    def buildProtocol(self, addr: IPv4Address) -> UserProtocol:
         proto = self.protocol(addr, self)
-        self.handlers.append(proto)
         return proto
 
-
-def main():
-    factory = ServerFactory()
-    factory.protocol = UserProtocol
-    reactor.listenTCP(PORT, factory)
-    log.info('Start server at %s' % PORT)
-    reactor.run()
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG,
-                        format='%(name)-24s [LINE:%(lineno)-3s]# %(levelname)-8s [%(asctime)s]  %(message)s')
-    log = logging.getLogger('GLOBAL')
-    Base.metadata.create_all(engine)
-    main()
+    def run(self):
+        self.protocol = UserProtocol
+        reactor.listenTCP(PORT, self)
+        log.info('Start server at %s' % PORT)
+        reactor.run()

@@ -14,7 +14,7 @@ class Message:
 
     def __init__(self, message_type: str, data=None):
         self.type = message_type
-        self.data = data
+        self.data = data if data else {}
 
     @classmethod
     def from_json(cls, message: bytes):
@@ -40,6 +40,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, autoincrement=True, default=0)
     name = Column(String, nullable=False)
     password = Column(String, nullable=False)
+    rights = Column(Integer, default=1)
     cats = relationship('Cat', back_populates='owner')
 
     def __init__(cls, proto=None, **kwargs):

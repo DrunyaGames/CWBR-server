@@ -23,3 +23,8 @@ class BadLogin(AuthError):
 class RegError(BaseError):
     message = 'Name already registered'
     code = '004'
+
+
+class PermissionsError(BaseError):
+    message = 'Not enough rights'
+    code = '005'

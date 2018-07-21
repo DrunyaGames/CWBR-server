@@ -31,6 +31,7 @@ def auth(name: str, password: str) -> User:
         raise BadLogin
     user.proto = protocol
     protocol.user = user
+    protocol.send(Message('auth_ok'))
     return user
 
 

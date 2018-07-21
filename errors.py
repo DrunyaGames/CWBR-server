@@ -7,7 +7,7 @@ class AuthError(BaseError):
 
 
 class BadLogin(AuthError):
-    message = 'Bad login or password'
+    message = 'Bad login or password OR You already logged in'
     code = '003'
 
 
@@ -19,3 +19,13 @@ class RegError(BaseError):
 class PermissionsError(BaseError):
     message = 'Not enough rights'
     code = '005'
+
+
+class GameError(BaseError):
+    message = ''
+    code = '200'
+
+
+class ModeError(GameError):
+    message = 'Incorrect mode'
+    code = '201'

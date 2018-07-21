@@ -1,13 +1,9 @@
-from itsdangerous import JSONWebSignatureSerializer
 from easy_tcp.server import ServerFactory, protocol
 from easy_tcp.models import Message
-from models import User, Session
+from models import User, session
 from errors import *
-from config import *
 
 server = ServerFactory()
-session = Session()
-serializer = JSONWebSignatureSerializer(secret_key)
 
 
 def check_rights(rights):
@@ -26,6 +22,8 @@ def check_rights(rights):
 
 @server.handle('auth')
 def auth(name: str, password: str) -> User:
+    if protocol.user:
+        raise BadLogin
     user = session.query(User).filter_by(name=name, password=password).first()
     if not user:
         raise BadLogin
@@ -37,6 +35,8 @@ def auth(name: str, password: str) -> User:
 
 @server.handle('reg')
 def reg(name: str, password: str) -> User:
+    if protocol.user:
+        raise BadLogin
     _user = session.query(User).filter_by(name=name).first()
     if _user:
         raise RegError

@@ -1,9 +1,9 @@
 from itsdangerous import JSONWebSignatureSerializer
-from server import ServerFactory, protocol
-from models import Message, User, Session, Base, engine
+from easy_tcp.server import ServerFactory, protocol
+from easy_tcp.models import Message
+from models import User, Session, Base, engine
 from errors import *
 from config import *
-
 
 server = ServerFactory()
 session = Session()
@@ -17,6 +17,7 @@ def check_rights(rights):
         if protocol.user.rights < rights:
             raise PermissionsError
         return func
+
     return decorator
 
 

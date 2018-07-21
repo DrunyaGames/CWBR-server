@@ -1,13 +1,4 @@
-
-
-class BaseError(Exception):
-    message = 'Base error'
-    code = '000'
-
-
-class BadRequest(BaseError):
-    message = 'Bad request'
-    code = '001'
+from easy_tcp.errors import BaseError
 
 
 class AuthError(BaseError):

@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import Column, String, Integer, ForeignKey, create_engine
 
 
-engine = create_engine('sqlite:///:memory:', echo=False)
+engine = create_engine('sqlite:///db.sqlite', echo=False)
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
 
@@ -22,6 +22,15 @@ class User(Base):
         cls.proto = proto
         cls.send = proto.send
 
+    # noinspection PyTypeChecker
+    def dump(cls):
+        return {
+            'user_id': cls.id,
+            'name': cls.name,
+            'rights': cls.rights,
+            'cats': [cat.dump() for cat in cls.cats]
+        }
+
 
 class Cat(Base):
     __tablename__ = 'cat'
@@ -29,3 +38,13 @@ class Cat(Base):
     id = Column(Integer, primary_key=True)
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship("User", back_populates="cats")
+
+    def dump(cls):
+        return {
+            'id': cls.id,
+            'owner_id': cls.owner_id
+        }
+
+
+if __name__ == '__main__':
+    Base.metadata.create_all(engine)

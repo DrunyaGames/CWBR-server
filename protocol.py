@@ -1,7 +1,7 @@
 from itsdangerous import JSONWebSignatureSerializer
 from easy_tcp.server import ServerFactory, protocol
 from easy_tcp.models import Message
-from models import User, Session, Base, engine
+from models import User, Session
 from errors import *
 from config import *
 
@@ -31,7 +31,7 @@ def auth(name: str, password: str) -> User:
         raise BadLogin
     user.proto = protocol
     protocol.user = user
-    protocol.send(Message('auth_ok'))
+    protocol.send(Message('auth_ok', user.dump()))
     return user
 
 
@@ -44,6 +44,7 @@ def reg(name: str, password: str) -> User:
     session.add(user)
     session.commit()
     protocol.user = user
+    protocol.send(Message('reg_ok', user.dump()))
     return user
 
 
@@ -54,5 +55,4 @@ def test():
 
 
 if __name__ == '__main__':
-    Base.metadata.create_all(engine)
     server.run()

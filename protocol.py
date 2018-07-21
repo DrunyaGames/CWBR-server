@@ -12,11 +12,14 @@ serializer = JSONWebSignatureSerializer(secret_key)
 
 def check_rights(rights):
     def decorator(func):
-        if not protocol.user:
-            raise AuthError
-        if protocol.user.rights < rights:
-            raise PermissionsError
-        return func
+        def wrapper(*args, **kwargs):
+            if not protocol.user:
+                raise AuthError
+            if protocol.user.rights < rights:
+                raise PermissionsError
+            return func(*args, **kwargs)
+
+        return wrapper
 
     return decorator
 

@@ -1,6 +1,7 @@
 from easy_tcp.server import ServerFactory, protocol
 from easy_tcp.models import Message
 from models import User, session
+from game import Game
 from errors import *
 
 server = ServerFactory()
@@ -48,6 +49,12 @@ def reg(name: str, password: str) -> User:
     return user
 
 
+@check_rights(1)
+@server.handle('find_new_cat')
+def find_cat(mode: str):
+    game.user_wait(protocol.user, mode)
+
+
 @check_rights(2)
 @server.handle('check')
 def test():
@@ -55,4 +62,5 @@ def test():
 
 
 if __name__ == '__main__':
+    game = Game()
     server.run()

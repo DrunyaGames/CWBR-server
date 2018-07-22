@@ -3,6 +3,10 @@ from easy_tcp.models import Message
 from models import Cat
 from errors import *
 import random
+import logging
+
+
+log = logging.getLogger('GAME')
 
 
 class Chance:
@@ -34,8 +38,7 @@ class Game:
         )
     }
 
-    def __init__(self, reactor):
-        self.reactor = reactor
+    def __init__(self):
 
         self.task = task.LoopingCall(self.cat_finder)
         self.task.start(self.update)
@@ -55,3 +58,4 @@ class Game:
                 user.add_cat(cat)
                 user.send(Message('new_cat', cat.dump()))
                 self.waiting_for_cat.pop(user)
+                log.debug('User %s find new cat' % user)

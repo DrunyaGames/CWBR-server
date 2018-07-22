@@ -24,9 +24,10 @@ class User(Base):
     rights = Column(Integer, default=1)
     cats = relationship('Cat', back_populates='owner')
 
-    def __init__(cls, proto=None, **kwargs):
+    def __init__(cls, proto=None, game=None, **kwargs):
         super().__init__(**kwargs)
         cls.proto = proto
+        cls.game = game
         cls.send = proto.send
 
     def from_session(cls, sign):
@@ -51,6 +52,9 @@ class User(Base):
         }
         dump['session'] = serializer.dumps(dump).decode()
         return dump
+
+    def __repr__(self):
+        return '<User: name=%s id=%s>' % (self.name, self.id)
 
 
 class Cat(Base):

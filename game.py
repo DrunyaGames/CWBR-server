@@ -15,7 +15,9 @@ class Chance:
         self.rand = rand
 
     def check(self):
-        if random.randint(*self.rand) == random.randint(*self.rand):
+        a, b = random.randint(*self.rand), random.randint(*self.rand)
+        log.debug('%s, %s' % (a, b))
+        if a == b:
             return random.randint(*self.powers)
         return False
 
@@ -39,10 +41,9 @@ class Game:
     }
 
     def __init__(self):
-
+        self.waiting_for_cat = {}
         self.task = task.LoopingCall(self.cat_finder)
         self.task.start(self.update)
-        self.waiting_for_cat = {}
 
     def user_wait(self, user, mode):
         try:
@@ -51,7 +52,8 @@ class Game:
             raise ModeError
 
     def cat_finder(self):
-        for user, chance in self.waiting_for_cat.copy(), self.waiting_for_cat.copy().values():
+        copy = self.waiting_for_cat.copy()
+        for user, chance in zip(copy.keys(), copy.values()):
             power = chance.check()
             if power:
                 cat = Cat(power=power)

@@ -28,7 +28,7 @@ def auth(name: str, password: str) -> User:
     user = session.query(User).filter_by(name=name, password=password).first()
     if not user:
         raise BadLogin
-    user.proto = protocol
+    user.init(protocol, game)
     protocol.user = user
     protocol.send(Message('auth_ok', user.dump()))
     return user
@@ -41,7 +41,7 @@ def reg(name: str, password: str) -> User:
     _user = session.query(User).filter_by(name=name).first()
     if _user:
         raise RegError
-    user = User(protocol, name=name, password=password)
+    user = User(protocol, game, name=name, password=password)
     session.add(user)
     session.commit()
     protocol.user = user

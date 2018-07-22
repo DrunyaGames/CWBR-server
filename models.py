@@ -2,6 +2,7 @@ from itsdangerous import JSONWebSignatureSerializer, BadSignature
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import Column, String, Integer, ForeignKey, create_engine
+from easy_tcp.server import protocol
 from tools import random_hex
 from config import secret_key
 from errors import AuthError
@@ -26,6 +27,11 @@ class User(Base):
 
     def __init__(cls, proto=None, game=None, **kwargs):
         super().__init__(**kwargs)
+        cls.proto = proto
+        cls.game = game
+        cls.send = proto.send if proto else None
+
+    def init(cls, proto: protocol, game):
         cls.proto = proto
         cls.game = game
         cls.send = proto.send
@@ -61,16 +67,16 @@ class User(Base):
 class Cat(Base):
     __tablename__ = 'cat'
 
-    id = Column(Integer, primary_key=True, autoincrement=True, default=0)
-    power = Column(Integer)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    power = Column(Integer, nullable=False)
     name = Column(String)
     color = Column(String)
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship("User", back_populates="cats")
 
     # noinspection PyArgumentList
-    def __init__(cls, **_):
-        super().__init__()
+    def __init__(cls, **kwargs):
+        super().__init__(**kwargs)
         cls.color = random_hex()
 
     def dump(cls):
@@ -84,5 +90,6 @@ class Cat(Base):
 
 
 if __name__ == '__main__':
-    Base.metadata.create_all(engine)
-    session.commit()
+    user = User()
+    # Base.metadata.create_all(engine)
+    # session.commit()

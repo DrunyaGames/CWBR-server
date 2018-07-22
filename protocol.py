@@ -36,7 +36,7 @@ def auth(name: str, password: str) -> User:
 
 @server.handle('reg')
 def reg(name: str, password: str) -> User:
-    if protocol.user:
+    if protocol.user or len(name) < 4 or len(password) < 4:
         raise BadLogin
     _user = session.query(User).filter_by(name=name).first()
     if _user:
@@ -46,6 +46,15 @@ def reg(name: str, password: str) -> User:
     session.commit()
     protocol.user = user
     protocol.send(Message('reg_ok', user.dump()))
+    return user
+
+
+@server.handle('session_auth')
+def session_auth(sign: str) -> User:
+    if protocol.user:
+        raise BadLogin
+    user = User.from_session(sign)
+    protocol.user = user
     return user
 
 

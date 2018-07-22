@@ -18,7 +18,7 @@ session = Session()
 class User(Base):
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True, autoincrement=True, default=0)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
     password = Column(String, nullable=False)
     rights = Column(Integer, default=1)
@@ -30,12 +30,13 @@ class User(Base):
         cls.game = game
         cls.send = proto.send
 
-    def from_session(cls, sign):
+    @classmethod
+    def from_session(mcs, sign):
         try:
             json = serializer.loads(sign)
         except BadSignature:
             raise AuthError
-        return session.query(cls).filter_by(id=json['user_id']).first()
+        return session.query(mcs).filter_by(id=json['user_id']).first()
 
     def add_cat(cls, cat):
         cls.cats.append(cat)

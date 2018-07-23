@@ -69,10 +69,9 @@ def find_cat(mode: str):
 @check_rights(1)
 @server.handle('change_cat_name')
 def change_name(name: str, cat_id):
-    if 15 < len(name) < 1:
+    if 15 > len(name) > 1:
         cat = session.query(Cat).filter_by(id=cat_id).first()
         cat.name = name
-        protocol.log.debug('Name changed. %s' % name)
         session.commit()
 
 

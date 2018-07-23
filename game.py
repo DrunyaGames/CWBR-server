@@ -56,7 +56,7 @@ class Game:
         for user, chance in zip(copy.keys(), copy.values()):
             power = chance.check()
             if power:
-                cat = Cat(power=power)
+                cat = Cat(power=power, tum=True if random.randint(1, 100) < 30 else False)
                 user.add_cat(cat)
                 user.send(Message('new_cat', cat.dump()))
                 self.waiting_for_cat.pop(user)

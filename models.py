@@ -1,7 +1,7 @@
 from itsdangerous import JSONWebSignatureSerializer, BadSignature
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy import Column, String, Integer, ForeignKey, create_engine
+from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, create_engine
 from easy_tcp.server import protocol
 from tools import random_hex
 from config import secret_key
@@ -67,6 +67,7 @@ class Cat(Base):
     power = Column(Integer, nullable=False)
     name = Column(String)
     color = Column(String)
+    tum = Column(Boolean, nullable=False, default=False)
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship("User", back_populates="cats")
 
@@ -81,11 +82,12 @@ class Cat(Base):
             'name': cls.name,
             'color': cls.color,
             'power': cls.power,
+            'tum': cls.tum,
             'owner_id': cls.owner_id
         }
 
     def __repr__(self):
-        return '<Cat: color=%s power=%s>'
+        return '<Cat: color=%s power=%s>' % (self.color, self.power)
 
 
 class Item(Base):

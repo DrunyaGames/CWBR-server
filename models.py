@@ -8,7 +8,7 @@ from config import secret_key
 from errors import AuthError
 import random
 
-engine = create_engine('sqlite:///test.sqlite', echo=False)
+engine = create_engine('sqlite:///db.sqlite', echo=False)
 serializer = JSONWebSignatureSerializer(secret_key)
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
@@ -19,6 +19,7 @@ session = Session()
 names = [
     'Барсик',
     'Пушок',
+    'Порошок',
     'Гнум',
     'Снежок',
     'Коса',

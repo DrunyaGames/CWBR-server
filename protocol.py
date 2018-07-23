@@ -66,6 +66,15 @@ def find_cat(mode: str):
     game.user_wait(protocol.user, mode)
 
 
+@check_rights(1)
+@server.handle('change_cat_name')
+def change_name(name: str, cat_id):
+    if 15 < len(name) < 1:
+        cat = session.query(Cat).filter_by(id=cat_id).first()
+        cat.name = name
+        session.commit()
+
+
 @check_rights(5)
 @server.handle('add_cat')
 def add_cat(power: int, color=None, name=None):

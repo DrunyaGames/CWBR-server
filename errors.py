@@ -29,3 +29,8 @@ class GameError(BaseError):
 class ModeError(GameError):
     message = 'Incorrect mode'
     code = '201'
+
+
+class BadName(GameError):
+    message = 'Bad cats name'
+    code = '202'

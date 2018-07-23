@@ -8,7 +8,7 @@ from config import secret_key
 from errors import AuthError
 import random
 
-engine = create_engine('sqlite:///db.sqlite', echo=False)
+engine = create_engine('sqlite:///test.sqlite', echo=False)
 serializer = JSONWebSignatureSerializer(secret_key)
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
@@ -72,7 +72,7 @@ class User(Base):
         return dump
 
     def __repr__(self):
-        return '<User: name=%s id=%s>' % (self.name, self.id)
+        return f'<User: name={self.name} id={self.id}>'
 
 
 class Cat(Base):
@@ -103,24 +103,34 @@ class Cat(Base):
         }
 
     def __repr__(self):
-        return '<Cat: color=%s power=%s>' % (self.color, self.power)
+        return f'<Cat: color={self.color} power={self.power}'
 
 
 class Item(Base):
     __tablename__ = 'items'
 
-    id = Column(String)
     unique_id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(String)
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship("User", back_populates="inventory")
 
+    __mapper_args__ = {'polymorphic_on': id}
+
+
+class Chest(Item):
+
+    item_id = '1'
+
+    __mapper_args__ = {'polymorphic_identity': item_id}
+
 
 if __name__ == '__main__':
+    pass
     Base.metadata.create_all(engine)
     session.commit()
 
-    # user = User(name='admin', password='1234', inventory=[
-    #     Chest()
-    # ])
-    # session.add(user)
-    # session.commit()
+    user = User(name='admin', password='1234', inventory=[
+        Chest()
+    ])
+    session.add(user)
+    session.commit()

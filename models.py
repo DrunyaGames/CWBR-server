@@ -95,7 +95,6 @@ class Item(Base):
     unique_id = Column(Integer, primary_key=True, autoincrement=True)
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship("User", back_populates="inventory")
-    __mapper_args__ = {'id': '1'}
 
 
 if __name__ == '__main__':

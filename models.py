@@ -72,7 +72,7 @@ class User(Base):
         return dump
 
     def __repr__(self):
-        return f'<User: name={self.name} id={self.id}>'
+        return '<User: name=%s id=%s>' % (self.name, self.id)
 
 
 class Cat(Base):
@@ -103,7 +103,7 @@ class Cat(Base):
         }
 
     def __repr__(self):
-        return f'<Cat: color={self.color} power={self.power}'
+        return '<Cat: color=%s power=%s' % (self.color, self.power)
 
 
 class Item(Base):

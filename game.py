@@ -60,4 +60,4 @@ class Game:
                 user.add_cat(cat)
                 user.send(Message('new_cat', cat.dump()))
                 self.waiting_for_cat.pop(user)
-                log.debug(f'User {user} find new cat {cat}')
+                log.debug('User %s find new cat %s' % (user, cat))

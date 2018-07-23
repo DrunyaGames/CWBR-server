@@ -83,7 +83,7 @@ class Cat(Base):
     power = Column(Integer, nullable=False)
     name = Column(String)
     color = Column(String)
-    tum = Column(Boolean, nullable=False, default=False)
+    tum = Column(Boolean, nullable=False)
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship("User", back_populates="cats")
 

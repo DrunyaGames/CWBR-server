@@ -7,7 +7,6 @@ from tools import random_hex
 from config import secret_key
 from errors import AuthError
 
-
 engine = create_engine('sqlite:///db.sqlite', echo=False)
 serializer = JSONWebSignatureSerializer(secret_key)
 Session = sessionmaker(bind=engine)
@@ -24,6 +23,7 @@ class User(Base):
     password = Column(String, nullable=False)
     rights = Column(Integer, default=1)
     cats = relationship('Cat', back_populates='owner')
+    inventory = relationship('Item', back_populates='owner', enable_typechecks=False)
 
     def __init__(cls, proto=None, game=None, **kwargs):
         super().__init__(**kwargs)
@@ -51,13 +51,9 @@ class User(Base):
 
     # noinspection PyTypeChecker
     def dump(cls):
-        dump = {
-            'user_id': cls.id,
-            'name': cls.name,
-            'rights': cls.rights,
-            'cats': [cat.dump() for cat in cls.cats]
-        }
+        dump = dict(user_id=cls.id, name=cls.name, rights=cls.rights)
         dump['session'] = serializer.dumps(dump).decode()
+        dump['cats'] = [cat.dump() for cat in cls.cats]
         return dump
 
     def __repr__(self):
@@ -77,7 +73,7 @@ class Cat(Base):
     # noinspection PyArgumentList
     def __init__(cls, **kwargs):
         super().__init__(**kwargs)
-        cls.color = random_hex()
+        cls.color = random_hex() if not cls.color else kwargs['color']
 
     def dump(cls):
         return {
@@ -88,8 +84,30 @@ class Cat(Base):
             'owner_id': cls.owner_id
         }
 
+    def __repr__(self):
+        return '<Cat: color=%s power=%s>'
+
+
+class Item(Base):
+    __tablename__ = 'items'
+
+    id = Column(String)
+    unique_id = Column(Integer, primary_key=True, autoincrement=True)
+    owner_id = Column(Integer, ForeignKey('users.id'))
+    owner = relationship("User", back_populates="inventory")
+    __mapper_args__ = {'id': '1'}
+
+
+class Chest(Item):
+    __mapper_args__ = {'id': '1'}
+
 
 if __name__ == '__main__':
-    user = User()
-    # Base.metadata.create_all(engine)
+    Base.metadata.create_all(engine)
+    session.commit()
+
+    # user = User(name='admin', password='1234', inventory=[
+    #     Chest()
+    # ])
+    # session.add(user)
     # session.commit()

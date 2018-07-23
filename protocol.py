@@ -1,6 +1,6 @@
 from easy_tcp.server import ServerFactory, protocol
 from easy_tcp.models import Message
-from models import User, session
+from models import User, Cat, session
 from game import Game
 from errors import *
 
@@ -59,15 +59,15 @@ def session_auth(sign: str) -> User:
 
 
 @check_rights(1)
-@server.handle('find_new_cat')
+@server.handle('mine_new_cat')
 def find_cat(mode: str):
     game.user_wait(protocol.user, mode)
 
 
-@check_rights(2)
-@server.handle('check')
-def test():
-    protocol.send(Message('test'))
+@check_rights(5)
+@server.handle('add_cat')
+def add_cat(power: int, color=None, name=None):
+    protocol.user.add_cat(Cat(power=power, color=color, name=name))
 
 
 if __name__ == '__main__':

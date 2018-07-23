@@ -129,8 +129,8 @@ if __name__ == '__main__':
     Base.metadata.create_all(engine)
     session.commit()
 
-    user = User(name='admin', password='1234', inventory=[
-        Chest()
-    ])
-    session.add(user)
-    session.commit()
+    # user = User(name='admin', password='1234', inventory=[
+    #     Chest()
+    # ])
+    # session.add(user)
+    # session.commit()

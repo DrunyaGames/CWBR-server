@@ -6,6 +6,7 @@ from easy_tcp.server import protocol
 from tools import random_hex
 from config import secret_key
 from errors import AuthError
+import random
 
 engine = create_engine('sqlite:///db.sqlite', echo=False)
 serializer = JSONWebSignatureSerializer(secret_key)
@@ -13,6 +14,20 @@ Session = sessionmaker(bind=engine)
 Base = declarative_base()
 
 session = Session()
+
+
+names = [
+    'Барсик',
+    'Пушок',
+    'Гнум',
+    'Снежок',
+    'Коса',
+    'Рефрижератор',
+    'Огонёк',
+    'Рыжик',
+    'Чума',
+    'Кот бледный',
+]
 
 
 class User(Base):
@@ -75,6 +90,7 @@ class Cat(Base):
     def __init__(cls, **kwargs):
         super().__init__(**kwargs)
         cls.color = random_hex() if not cls.color else kwargs['color']
+        cls.name = random.choice(names) if not cls.name else cls.name
 
     def dump(cls):
         return {

@@ -6,6 +6,8 @@ from errors import *
 
 server = ServerFactory()
 
+users = []
+
 
 def check_rights(rights):
     def decorator(func):

@@ -98,10 +98,6 @@ class Item(Base):
     __mapper_args__ = {'id': '1'}
 
 
-class Chest(Item):
-    __mapper_args__ = {'id': '1'}
-
-
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
     session.commit()

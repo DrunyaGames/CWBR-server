@@ -14,7 +14,7 @@ serializer = JSONWebSignatureSerializer(secret_key)
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
 
-session = Session(autocommit=True)
+session = Session()
 
 names = [
     'Барсик',

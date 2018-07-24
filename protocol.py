@@ -97,5 +97,10 @@ def add_cat(power: int, color=None, name=None):
 
 
 if __name__ == '__main__':
-    game = Game()
-    server.run()
+    try:
+        game = Game()
+        server.run()
+    except SystemExit:
+        pass
+    finally:
+        session.commit()

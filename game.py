@@ -44,7 +44,7 @@ class Game:
         ),
         'legendary': Chance(
             (20, 35),
-            (1, 10)
+            (1, 5)
         )
     }
 

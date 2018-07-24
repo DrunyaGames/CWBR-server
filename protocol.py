@@ -97,11 +97,13 @@ def add_cat(power: int, color=None, name=None):
 
 
 if __name__ == '__main__':
+    game = Game()
     try:
-        game = Game()
         server.run()
     except SystemExit:
         pass
     finally:
+        for user in game.waiting_for_cat:
+            user.is_mining = False
         session.commit()
         print('Dead')

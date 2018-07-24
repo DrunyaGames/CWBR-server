@@ -10,11 +10,15 @@ log = logging.getLogger('GAME')
 
 
 class Chance:
+    debug = True
+
     def __init__(self, powers, rand):
         self.powers = powers
         self.rand = rand
 
     def check(self):
+        if self.debug:
+            return random.randint(*self.powers)
         a, b = random.randint(*self.rand), random.randint(*self.rand)
         log.debug('%s, %s' % (a, b))
         if a == b:

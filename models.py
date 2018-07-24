@@ -102,8 +102,8 @@ class Cat(Base):
         '#ffffff',
         '#90a4ad',
         '#795547',
-        '#fc9107'
-        '#fef9c2'
+        '#fc9107',
+        '#fef9c2',
         '#212121',
         '#ba5f28',
         '#ada2ba'
@@ -126,7 +126,7 @@ class Cat(Base):
         cls.tail = True if random.randint(1, 100) < 20 else False
 
         if not cls.color:
-            if cls.power >= 10 and random.randint(1, 100) < 30:
+            if cls.power >= 10 and random.randint(1, 100) < 80:
                 cls.color = random_hex()
             else:
                 cls.color = random.choice(cls.default_colors)

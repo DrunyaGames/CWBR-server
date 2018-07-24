@@ -57,7 +57,7 @@ class User(Base):
 
     def send(cls, message):
         if not cls.proto.connected:
-            return   # TODO: deferred_messages
+            return  # TODO: deferred_messages
             # return cls.deferred_messages.append(json.dumps(DeferredMessage(message.dump())))
         try:
             cls.proto.send(message)
@@ -113,13 +113,17 @@ class Cat(Base):
     power = Column(Integer, nullable=False)
     name = Column(String)
     color = Column(String)
-    tum = Column(Boolean, nullable=False)
+    tum = Column(Boolean)
+    tail = Column(Boolean)
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship("User", back_populates="cats")
 
     def __init__(cls, **kwargs):
         super().__init__(**kwargs)
         cls.name = random.choice(names) if not cls.name else cls.name
+
+        cls.tum = True if random.randint(1, 100) < 30 else False
+        cls.tail = True if random.randint(1, 100) < 20 else False
 
         if not cls.color:
             if cls.power >= 10 and random.randint(1, 100) < 30:
@@ -134,6 +138,7 @@ class Cat(Base):
             'color': cls.color,
             'power': cls.power,
             'tum': cls.tum,
+            'tail': cls.tail,
             'owner_id': cls.owner_id
         }
 
@@ -174,10 +179,8 @@ class LootBox(Item):
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
-    # session.commit()
 
     # user = User(name='admin', password='1234', inventory=[
     #     Chest()
     # ])
     # session.add(user)
-    # session.commit()

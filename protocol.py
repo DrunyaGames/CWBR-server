@@ -26,14 +26,15 @@ def check_rights(rights):
 
 @server.on_open()
 def on_open():
-    protocols.append(protocol)
+    protocols.append(protocol.copy())
 
 
 @server.on_close()
 def on_close(_):
     protocol.connected = 0
-    if protocol in protocols:
-        protocols.remove(protocol)
+    proto = protocol.copy()
+    if proto in protocols:
+        protocols.remove(proto)
 
 
 @server.handle('auth')
@@ -43,7 +44,7 @@ def auth(name: str, password: str) -> User:
     user = session.query(User).filter_by(name=name, password=password).first()
     if not user:
         raise BadLogin
-    user.init(protocol, game)
+    user.init(protocol.copy(), game)
     protocol.user = user
     protocol.send(Message('auth_ok', user.dump()))
     return user
@@ -56,7 +57,7 @@ def reg(name: str, password: str) -> User:
     _user = session.query(User).filter_by(name=name).first()
     if _user:
         raise RegError
-    user = User(protocol, game, name=name, password=password)
+    user = User(protocol.copy(), game, name=name, password=password)
     session.add(user)
     protocol.user = user
     protocol.send(Message('reg_ok', user.dump()))
@@ -103,7 +104,7 @@ if __name__ == '__main__':
     except SystemExit:
         pass
     finally:
-        for user in game.waiting_for_cat:
-            user.is_mining = False
+        for u in game.waiting_for_cat:
+            u.is_mining = False
         session.commit()
         print('Dead')

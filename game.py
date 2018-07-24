@@ -43,7 +43,7 @@ class Game:
             (1, 100)
         ),
         'legendary': Chance(
-            (20, 35),
+            (30, 40),
             (1, 5)
         )
     }

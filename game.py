@@ -10,7 +10,7 @@ log = logging.getLogger('GAME')
 
 
 class Chance:
-    debug = True
+    debug = False
 
     def __init__(self, powers, rand):
         self.powers = powers
@@ -41,6 +41,10 @@ class Game:
         'hard': Chance(
             (20, 30),
             (1, 100)
+        ),
+        'legendary': Chance(
+            (20, 35),
+            (1, 10)
         )
     }
 

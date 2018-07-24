@@ -104,3 +104,4 @@ if __name__ == '__main__':
         pass
     finally:
         session.commit()
+        print('Dead')

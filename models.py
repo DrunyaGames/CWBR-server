@@ -75,6 +75,7 @@ class User(Base):
     def add_cat(cls, cat):
         cls.cats.append(cat)
         session.add(cat)
+        session.commit()
 
     # noinspection PyTypeChecker
     def send_deferred_messages(cls):

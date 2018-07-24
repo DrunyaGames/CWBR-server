@@ -2,10 +2,11 @@ from itsdangerous import JSONWebSignatureSerializer, BadSignature
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, create_engine
-from easy_tcp.server import protocol
+from easy_tcp.models import Message
 from tools import random_hex
 from config import secret_key
 from errors import AuthError
+from traceback import print_exc
 import random
 
 engine = create_engine('sqlite:///db.sqlite', echo=False)
@@ -13,8 +14,7 @@ serializer = JSONWebSignatureSerializer(secret_key)
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
 
-session = Session()
-
+session = Session(autocommit=True)
 
 names = [
     'Барсик',
@@ -40,36 +40,54 @@ class User(Base):
     rights = Column(Integer, default=1)
     cats = relationship('Cat', back_populates='owner')
     inventory = relationship('Item', back_populates='owner', enable_typechecks=False)
+    deferred_messages = relationship('DeferredMessage', back_populates='owner')
+
+    is_mining = Column(Boolean)
 
     def __init__(cls, proto=None, game=None, **kwargs):
         super().__init__(**kwargs)
         cls.proto = proto
         cls.game = game
         cls.send = proto.send if proto else None
+        cls.is_mining = False
 
-    def init(cls, proto: protocol, game):
+    def init(cls, proto, game):
         cls.proto = proto
         cls.game = game
-        cls.send = proto.send
+
+    def send(cls, message):
+        if not cls.proto.connected:
+            return   # TODO: deferred_messages
+            # return cls.deferred_messages.append(json.dumps(DeferredMessage(message.dump())))
+        try:
+            cls.proto.send(message)
+        except:
+            print_exc()
 
     @classmethod
     def from_session(mcs, sign):
         try:
-            json = serializer.loads(sign)
+            _json = serializer.loads(sign)
         except BadSignature:
             raise AuthError
-        return session.query(mcs).filter_by(id=json['user_id']).first()
+        return session.query(mcs).filter_by(id=_json['user_id']).first()
 
     def add_cat(cls, cat):
         cls.cats.append(cat)
         session.add(cat)
-        session.commit()
+
+    # noinspection PyTypeChecker
+    def send_deferred_messages(cls):
+        for msg in cls.deferred_messages:
+            cls.send(Message.from_json(msg))
+        cls.deferred_messages.clear()
 
     # noinspection PyTypeChecker
     def dump(cls):
         dump = dict(user_id=cls.id, name=cls.name, rights=cls.rights)
         dump['session'] = serializer.dumps(dump).decode()
         dump['cats'] = [cat.dump() for cat in cls.cats]
+        dump['is_mining'] = cls.is_mining
         return dump
 
     def __repr__(self):
@@ -79,6 +97,18 @@ class User(Base):
 class Cat(Base):
     __tablename__ = 'cat'
 
+    default_colors = [
+        '#616161',
+        '#ffffff',
+        '#90a4ad',
+        '#795547',
+        '#fc9107'
+        '#fef9c2'
+        '#212121',
+        '#ba5f28',
+        '#ada2ba'
+    ]
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     power = Column(Integer, nullable=False)
     name = Column(String)
@@ -87,11 +117,15 @@ class Cat(Base):
     owner_id = Column(Integer, ForeignKey('users.id'))
     owner = relationship("User", back_populates="cats")
 
-    # noinspection PyArgumentList
     def __init__(cls, **kwargs):
         super().__init__(**kwargs)
-        cls.color = random_hex() if not cls.color else kwargs['color']
         cls.name = random.choice(names) if not cls.name else cls.name
+
+        if not cls.color:
+            if cls.power >= 10 and random.randint(1, 100) < 30:
+                cls.color = random_hex()
+            else:
+                cls.color = random.choice(cls.default_colors)
 
     def dump(cls):
         return {
@@ -107,6 +141,21 @@ class Cat(Base):
         return '<Cat: color=%s power=%s' % (self.color, self.power)
 
 
+class DeferredMessage(Base):
+    __tablename__ = 'messages'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    data = Column(String)
+    owner_id = Column(Integer, ForeignKey('users.id'))
+    owner = relationship("User", back_populates="deferred_messages")
+
+    def __init__(cls, data, **kwargs):
+        super().__init__(**kwargs)
+        cls.data = data
+
+    def dump(cls):
+        return cls.data
+
+
 class Item(Base):
     __tablename__ = 'items'
 
@@ -118,17 +167,14 @@ class Item(Base):
     __mapper_args__ = {'polymorphic_on': id}
 
 
-class Chest(Item):
-
+class LootBox(Item):
     item_id = '1'
-
     __mapper_args__ = {'polymorphic_identity': item_id}
 
 
 if __name__ == '__main__':
-    pass
     Base.metadata.create_all(engine)
-    session.commit()
+    # session.commit()
 
     # user = User(name='admin', password='1234', inventory=[
     #     Chest()

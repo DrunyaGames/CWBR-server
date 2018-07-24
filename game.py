@@ -48,6 +48,7 @@ class Game:
     def user_wait(self, user, mode):
         try:
             self.waiting_for_cat[user] = self.chances[mode]
+            user.is_mining = True
         except KeyError:
             raise ModeError
 
@@ -56,10 +57,9 @@ class Game:
         for user, chance in zip(copy.keys(), copy.values()):
             power = chance.check()
             if power:
-                _r = random.randint(1, 100)
-                log.debug(_r)
-                cat = Cat(power=power, tum=True if _r < 30 else False)
+                cat = Cat(power=power, tum=True if random.randint(1, 100) < 30 else False)
                 user.add_cat(cat)
+                user.is_mining = False
                 user.send(Message('new_cat', cat.dump()))
                 self.waiting_for_cat.pop(user)
                 log.debug('User %s find new cat %s' % (user, cat))

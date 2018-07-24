@@ -6,7 +6,8 @@ from errors import *
 
 server = ServerFactory()
 
-users = []
+
+protocols = []
 
 
 def check_rights(rights):
@@ -21,6 +22,18 @@ def check_rights(rights):
         return wrapper
 
     return decorator
+
+
+@server.on_open()
+def on_open():
+    protocols.append(protocol)
+
+
+@server.on_close()
+def on_close(_):
+    protocol.connected = 0
+    if protocol in protocols:
+        protocols.remove(protocol)
 
 
 @server.handle('auth')
@@ -45,7 +58,6 @@ def reg(name: str, password: str) -> User:
         raise RegError
     user = User(protocol, game, name=name, password=password)
     session.add(user)
-    session.commit()
     protocol.user = user
     protocol.send(Message('reg_ok', user.dump()))
     return user
@@ -57,12 +69,15 @@ def session_auth(sign: str) -> User:
         raise BadLogin
     user = User.from_session(sign)
     protocol.user = user
+    protocol.send(Message('auth_ok', user.dump()))
     return user
 
 
 @check_rights(1)
 @server.handle('mine_new_cat')
 def find_cat(mode: str):
+    if protocol.user.is_mining:
+        raise GameError
     game.user_wait(protocol.user, mode)
 
 
@@ -72,7 +87,7 @@ def change_name(name: str, cat_id):
     if 15 > len(name) > 1:
         cat = session.query(Cat).filter_by(id=cat_id).first()
         cat.name = name
-        session.commit()
+    raise NameError
 
 
 @check_rights(5)

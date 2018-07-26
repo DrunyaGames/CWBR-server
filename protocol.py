@@ -58,6 +58,7 @@ def reg(name: str, password: str) -> User:
         raise RegError
     user = User(protocol.copy(), game, name=name, password=password)
     session.add(user)
+    session.commit()
     protocol.user = user
     protocol.send(Message('reg_ok', user.dump()))
     return user

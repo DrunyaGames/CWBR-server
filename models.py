@@ -89,6 +89,7 @@ class User(Base):
         dump['session'] = serializer.dumps(dump).decode()
         dump['cats'] = [cat.dump() for cat in cls.cats]
         dump['is_mining'] = cls.is_mining
+        dump['inventory'] = [item.dump() for item in cls.inventory]
         return dump
 
     def __repr__(self):
@@ -165,12 +166,21 @@ class DeferredMessage(Base):
 class Item(Base):
     __tablename__ = 'items'
 
+    item_id = 0
+
     unique_id = Column(Integer, primary_key=True, autoincrement=True)
     id = Column(String)
     owner_id = Column(Integer, ForeignKey('users.id'))
+    count = Column(Integer, default=1)
     owner = relationship("User", back_populates="inventory")
 
     __mapper_args__ = {'polymorphic_on': id}
+
+    def dump(cls):
+        return {
+            'id': cls.item_id,
+            'count': cls.count
+        }
 
 
 class LootBox(Item):
@@ -178,9 +188,29 @@ class LootBox(Item):
     __mapper_args__ = {'polymorphic_identity': item_id}
 
 
+class EasyMilk(Item):
+    item_id = '2'
+    __mapper_args__ = {'polymorphic_identity': item_id}
+
+
+class NormalMilk(Item):
+    item_id = '2:1'
+    __mapper_args__ = {'polymorphic_identity': item_id}
+
+
+class HardMilk(Item):
+    item_id = '2:2'
+    __mapper_args__ = {'polymorphic_identity': item_id}
+
+
+class LegendaryMilk(Item):
+    item_id = '2:3'
+    __mapper_args__ = {'polymorphic_identity': item_id}
+
+
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
-
+    session.commit()
     # user = User(name='admin', password='1234', inventory=[
     #     Chest()
     # ])

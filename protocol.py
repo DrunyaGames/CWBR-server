@@ -83,8 +83,12 @@ def use_item(item_id, **kwargs):
         raise ItemError
 
     if item.count > 0:
-        item.use(**kwargs)
+        result = item.use(**kwargs)
+        protocol.send(Message('item_used', result))
     else:
+        raise ItemError
+
+    if item.count <= 0:
         session.delete(item)
 
 

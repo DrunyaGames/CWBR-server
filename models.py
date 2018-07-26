@@ -191,7 +191,7 @@ class LootBox(Item):
     __mapper_args__ = {'polymorphic_identity': id}
 
 
-class EasyMilk(Item):
+class Milk(Item):
     id = '2'
     __mapper_args__ = {'polymorphic_identity': id}
 
@@ -200,17 +200,17 @@ class EasyMilk(Item):
         cls.owner.game.user_wait(cls.owner, cls.item_id)
 
 
-class NormalMilk(Item):
+class NormalMilk(Milk):
     id = '2:1'
     __mapper_args__ = {'polymorphic_identity': id}
 
 
-class HardMilk(Item):
+class HardMilk(Milk):
     id = '2:2'
     __mapper_args__ = {'polymorphic_identity': id}
 
 
-class LegendaryMilk(Item):
+class LegendaryMilk(Milk):
     id = '2:3'
     __mapper_args__ = {'polymorphic_identity': id}
 

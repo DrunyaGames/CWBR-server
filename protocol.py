@@ -79,10 +79,12 @@ def session_auth(sign: str) -> User:
 @server.handle('use_item')
 def use_item(item_id, **kwargs):
     item = session.query(Item).filter_by(item_id=item_id, owner_id=protocol.user.id).first()
-    if item:
+    if not item:
+        raise ItemError
+    if item.count > 0:
         item.use(**kwargs)
-    if item.count <= 0:
-        item.delete()
+    else:
+        session.delete(item)
 
 
 @check_rights(1)

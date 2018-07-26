@@ -26,8 +26,8 @@ class GameError(BaseError):
     code = '200'
 
 
-class ModeError(GameError):
-    message = 'Incorrect mode'
+class ItemError(GameError):
+    message = 'Item Error'
     code = '201'
 
 

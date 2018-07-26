@@ -1,11 +1,10 @@
 from easy_tcp.server import ServerFactory, protocol
 from easy_tcp.models import Message
-from models import User, Cat, session
+from models import User, Item, Cat, session
 from game import Game
 from errors import *
 
 server = ServerFactory()
-
 
 protocols = []
 
@@ -69,17 +68,20 @@ def session_auth(sign: str) -> User:
     if protocol.user:
         raise BadLogin
     user = User.from_session(sign)
+    user.init(protocol.copy(), game)
     protocol.user = user
     protocol.send(Message('auth_ok', user.dump()))
     return user
 
 
 @check_rights(1)
-@server.handle('mine_new_cat')
-def find_cat(mode: str):
-    if protocol.user.is_mining:
-        raise GameError
-    game.user_wait(protocol.user, mode)
+@server.handle('use_item')
+def use_item(item_id, **kwargs):
+    item = session.query(Item).filter_by(item_id=item_id, owner_id=protocol.user.id).first()
+    if item:
+        item.use(**kwargs)
+    if item.count <= 0:
+        item.delete()
 
 
 @check_rights(1)

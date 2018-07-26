@@ -30,19 +30,19 @@ class Game:
 
     update = 10
     chances = {
-        'easy': Chance(
+        '2': Chance(
             (1, 10),
             (1, 10)
         ),
-        'normal': Chance(
+        '2:1': Chance(
             (5, 15),
             (1, 20)
         ),
-        'hard': Chance(
+        '2:2': Chance(
             (20, 30),
             (1, 100)
         ),
-        'legendary': Chance(
+        '2:3': Chance(
             (30, 40),
             (1, 5)
         )

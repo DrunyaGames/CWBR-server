@@ -166,52 +166,56 @@ class DeferredMessage(Base):
 class Item(Base):
     __tablename__ = 'items'
 
-    item_id = 0
+    id = '0'
 
     unique_id = Column(Integer, primary_key=True, autoincrement=True)
-    id = Column(String)
+    item_id = Column(String)
     owner_id = Column(Integer, ForeignKey('users.id'))
     count = Column(Integer, default=1)
     owner = relationship("User", back_populates="inventory")
 
-    __mapper_args__ = {'polymorphic_on': id}
+    __mapper_args__ = {'polymorphic_on': item_id}
+
+    def use(cls, **kwargs):
+        cls.count -= 1
 
     def dump(cls):
         return {
-            'id': cls.item_id,
+            'id': cls.id,
             'count': cls.count
         }
 
 
 class LootBox(Item):
-    item_id = '1'
-    __mapper_args__ = {'polymorphic_identity': item_id}
+    id = '1'
+    __mapper_args__ = {'polymorphic_identity': id}
 
 
 class EasyMilk(Item):
-    item_id = '2'
-    __mapper_args__ = {'polymorphic_identity': item_id}
+    id = '2'
+    __mapper_args__ = {'polymorphic_identity': id}
+
+    def use(cls):
+        super().use()
+        cls.owner.game.user_wait(cls.owner, cls.item_id)
 
 
 class NormalMilk(Item):
-    item_id = '2:1'
-    __mapper_args__ = {'polymorphic_identity': item_id}
+    id = '2:1'
+    __mapper_args__ = {'polymorphic_identity': id}
 
 
 class HardMilk(Item):
-    item_id = '2:2'
-    __mapper_args__ = {'polymorphic_identity': item_id}
+    id = '2:2'
+    __mapper_args__ = {'polymorphic_identity': id}
 
 
 class LegendaryMilk(Item):
-    item_id = '2:3'
-    __mapper_args__ = {'polymorphic_identity': item_id}
+    id = '2:3'
+    __mapper_args__ = {'polymorphic_identity': id}
 
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
     session.commit()
-    # user = User(name='admin', password='1234', inventory=[
-    #     Chest()
-    # ])
-    # session.add(user)
+

@@ -81,6 +81,7 @@ def use_item(item_id, **kwargs):
     item = session.query(Item).filter_by(item_id=item_id, owner_id=protocol.user.id).first()
     if not item:
         raise ItemError
+
     if item.count > 0:
         item.use(**kwargs)
     else:
